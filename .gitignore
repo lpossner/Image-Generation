@@ -213,10 +213,13 @@ __marimo__/
 .neptune
 
 # Data
-.data/
+.data/*
+!.data/.gitkeep
 
 # Checkpoints
-.checkpoints
+.checkpoints/*
+!.checkpoints/.gitkeep
 
 # Logs
-.logs/
+.logs/*
+!.logs/.gitkeep
