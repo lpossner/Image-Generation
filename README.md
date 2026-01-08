@@ -2,6 +2,8 @@
 
 A PyTorch implementation of popular generative models for image synthesis, featuring VAE, DCGAN, and WGAN architectures trained on the CelebA dataset.
 
+The model was trained on an NVIDIA T4 GPU using the CelebA dataset with a batch size of 256, a hidden dimension of 128, and a latent dimension of 256. Images generated after 1, 5, 10, 15, and 20 epochs are shown below. While the results remain far from state-of-the-art, the image quality visibly improves with training.
+
 ![WGAN Generated Faces](resources/WGAN_visualization.png)
 
 ## Overview
