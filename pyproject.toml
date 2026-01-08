@@ -15,3 +15,6 @@ dependencies = [
 tracking = [
     "neptune>=1.14.0",
 ]
+plotting = [
+    "matplotlib>=3.10.8",
+]

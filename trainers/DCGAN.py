@@ -10,6 +10,13 @@ import torch.nn.functional as F
 
 
 class DCGANTrainer:
+    """
+    Trainer for Deep Convolutional GAN (DCGAN) model.
+
+    Handles adversarial training of generator and discriminator networks.
+    Uses separate AdamW optimizers for each network with configurable learning
+    rates and beta parameters.
+    """
 
     def __init__(
         self,
@@ -24,6 +31,21 @@ class DCGANTrainer:
         beta2,
         latent_dim,
     ):
+        """
+        Initialize the DCGAN trainer.
+
+        Args:
+            model (DCGAN): DCGAN model to train.
+            device (torch.device): Device to train on (CPU/CUDA/MPS).
+            data_loader (DataLoader): DataLoader providing training batches.
+            checkpoint_name (str): Name for saving checkpoints.
+            logger (Logger): Logger for metrics and progress tracking.
+            lr_generator (float): Learning rate for generator optimizer.
+            lr_discriminator (float): Learning rate for discriminator optimizer.
+            beta1 (float): Beta1 parameter for Adam optimizer.
+            beta2 (float): Beta2 parameter for Adam optimizer.
+            latent_dim (int): Dimensionality of noise vector for generator.
+        """
         self.model = model.to(device)
         generator_optimizer = AdamW(
             model.generator.parameters(), lr=lr_generator, betas=(beta1, beta2)
@@ -45,6 +67,20 @@ class DCGANTrainer:
         }
 
     def train_epoch(self, epoch, epochs):
+        """
+        Train the DCGAN for one epoch.
+
+        Alternates between training discriminator (on real and fake images) and
+        generator (to fool the discriminator).
+
+        Args:
+            epoch (int): Current epoch number (0-indexed).
+            epochs (int): Total number of epochs.
+
+        Returns:
+            dict: Dictionary containing training metrics including batch_loss and
+                  epoch_loss for both generator and discriminator.
+        """
         self.model.train()
         epoch_loss_generator = 0.0
         epoch_loss_discriminator = 0.0
@@ -140,21 +176,55 @@ class DCGANTrainer:
         return self.metrics
     
     def loss(self, predictions, labels):
+        """
+        Compute binary cross-entropy loss for GAN training.
+
+        Args:
+            predictions (torch.Tensor): Discriminator predictions.
+            labels (torch.Tensor): Target labels (1 for real, 0 for fake).
+
+        Returns:
+            torch.Tensor: Binary cross-entropy loss (scalar).
+        """
         return F.binary_cross_entropy(predictions, labels)
-                
+
 
 class Optimizer:
+    """
+    Wrapper class for dual optimizers (generator and discriminator).
+
+    Provides a unified interface for state management of both optimizers.
+    """
 
     def __init__(self, generator_optimizer, discriminator_optimizer):
+        """
+        Initialize the optimizer wrapper.
+
+        Args:
+            generator_optimizer (torch.optim.Optimizer): Optimizer for generator.
+            discriminator_optimizer (torch.optim.Optimizer): Optimizer for discriminator.
+        """
         self.generator_optimizer = generator_optimizer
         self.discriminator_optimizer = discriminator_optimizer
     
     def state_dict(self):
+        """
+        Get state dictionary for both optimizers.
+
+        Returns:
+            dict: Dictionary containing state_dict for generator and discriminator optimizers.
+        """
         return {
             "generator_optimizer": self.generator_optimizer.state_dict(),
             "discriminator_optimizer": self.discriminator_optimizer.state_dict(),
         }
-    
+
     def load_state_dict(self, state_dict):
-            self.generator_optimizer.load_state_dict(state_dict["generator_optimizer"])
-            self.discriminator_optimizer.load_state_dict(state_dict["discriminator_optimizer"])
+        """
+        Load state dictionary for both optimizers.
+
+        Args:
+            state_dict (dict): Dictionary containing state_dict for both optimizers.
+        """
+        self.generator_optimizer.load_state_dict(state_dict["generator_optimizer"])
+        self.discriminator_optimizer.load_state_dict(state_dict["discriminator_optimizer"])
